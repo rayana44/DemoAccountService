@@ -1,5 +1,6 @@
 package com.account.serviceImpl;
 
+import com.account.dto.CreditCardApplicationRequest;
 import com.account.entity.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -8,11 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.ObjectMapper;
 
+
 @Service
 public class KafkaProducerService {
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaProducerService.class);
-    private static final String TOPIC = "account-data-topic";
+    private static final String CREDIT_CARD_TOPIC = "credit-card-application-topic";
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -20,13 +22,25 @@ public class KafkaProducerService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void sendAccountToCardService(Account account) {
+    public void sendCreditCardApplicationToCardService(Account account, CreditCardApplicationRequest request) {
         try {
-            String accountJson = objectMapper.writeValueAsString(account);
-            kafkaTemplate.send(TOPIC, account.getAccountNumber(), accountJson);
-            logger.info("Account data sent to Kafka topic: {}", TOPIC);
+            CreditCardApplicationRequest event = new CreditCardApplicationRequest();
+            event.setAccountNumber(account.getAccountNumber());
+            event.setCustomerName(account.getCustomerName());
+            event.setEmail(account.getEmail());
+            event.setMobileNumber(account.getMobileNumber());
+            event.setCibilScore(account.getCibilScore());
+            event.setCardType(request.getCardType());
+            event.setRequestReason(request.getRequestReason());
+            event.setApplicationDate(java.time.LocalDateTime.now());
+
+            String eventJson = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(CREDIT_CARD_TOPIC, account.getAccountNumber(), eventJson);
+            logger.info("Credit card application sent to Kafka topic: {} for account: {}",
+                    CREDIT_CARD_TOPIC, account.getAccountNumber());
         } catch (Exception e) {
-            logger.error("Error sending account data to Kafka", e);
+            logger.error("Error sending credit card application to Kafka", e);
+            throw new RuntimeException("Failed to send credit card application: " + e.getMessage());
         }
     }
 }

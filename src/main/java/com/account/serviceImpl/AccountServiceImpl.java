@@ -108,7 +108,7 @@ public class AccountServiceImpl implements AccountService {
         }
 
         Account account = accountOpt.get();
-
+        request.setCreditType(true);
         // Send to Kafka
         kafkaProducerService.sendCreditCardApplicationToCardService(account, request);
         logger.info("Credit card application sent successfully for account: {}", request.getAccountNumber());

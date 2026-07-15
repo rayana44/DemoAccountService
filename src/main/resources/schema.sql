@@ -14,3 +14,16 @@ CREATE TABLE IF NOT EXISTS accounts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
 );
+
+
+CREATE TABLE IF NOT EXISTS account_transactions (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    account_number VARCHAR(255) NOT NULL,
+    account_holder_name VARCHAR(255) NOT NULL,
+    transaction_type VARCHAR(255) NOT NULL,
+    amount DECIMAL(38, 2) NOT NULL,
+    balance_after_transaction DECIMAL(38, 2) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    transaction_date DATETIME(6) NOT NULL,
+    PRIMARY KEY (id)
+);

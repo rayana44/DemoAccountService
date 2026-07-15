@@ -62,7 +62,7 @@ public class AccountController {
     }
 
     // 4. Apply for Credit Card
-    @PostMapping("/apply-credit-card")
+    @PatchMapping("/apply-credit-card")
     public ResponseEntity<ApiResponse<String>> applyForCreditCard(@RequestBody CreditCardApplicationRequest request) {
         accountService.applyForCreditCard(request);
         return ResponseEntity.status(HttpStatus.ACCEPTED)

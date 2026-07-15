@@ -1,23 +1,33 @@
-package com.account.controller;
+package com.example.accountservice.controller;
 
-import com.account.dto.ApiResponse;
-import com.account.dto.CreditCardApplicationRequest;
-import com.account.entity.Account;
-import com.account.service.AccountService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.accountservice.dto.ApiResponse;
+import com.example.accountservice.dto.CreditCardApplicationRequest;
+import com.example.accountservice.entity.Account;
+import com.example.accountservice.entity.AccountTransaction;
+import com.example.accountservice.service.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/accounts")
+@RequestMapping("/api/v1/accountdetails/")
 @CrossOrigin(origins = "*")
 public class AccountController {
 
-    @Autowired
-    private AccountService accountService;
+    private final AccountService accountService;
+
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
     // 1. Create Account
     @PostMapping
@@ -38,7 +48,20 @@ public class AccountController {
                 .body(new ApiResponse<>("Account not found", 404, null));
     }
 
-    // 3. Apply for Credit Card
+    // 3. Get Transaction History by Account Number
+    @GetMapping("/{accountNumber}/transactions")
+    public ResponseEntity<ApiResponse<List<AccountTransaction>>> getTransactionHistory(
+            @PathVariable String accountNumber) {
+        Optional<List<AccountTransaction>> transactions = accountService.getTransactionHistory(accountNumber);
+        if (transactions.isPresent()) {
+            return ResponseEntity.ok(new ApiResponse<>("Transaction history retrieved successfully", 200,
+                    transactions.get()));
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>("Account not found", 404, null));
+    }
+
+    // 4. Apply for Credit Card
     @PostMapping("/apply-credit-card")
     public ResponseEntity<ApiResponse<String>> applyForCreditCard(@RequestBody CreditCardApplicationRequest request) {
         accountService.applyForCreditCard(request);

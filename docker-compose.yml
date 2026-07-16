@@ -1,6 +1,35 @@
 version: '3.8'
 
 services:
+  account-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql
+      - kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/accountdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: test
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    ports:
+      - "8080:8080"
+    networks:
+      - kafka-network
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: test
+      MYSQL_DATABASE: accountdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - kafka-network
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     environment:
@@ -32,3 +61,5 @@ networks:
   kafka-network:
     driver: bridge
 
+volumes:
+  mysql-data:
